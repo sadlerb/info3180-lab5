@@ -18,9 +18,18 @@ from werkzeug.security import check_password_hash
 ###
 
 @app.route('/')
+
 def home():
     """Render website's home page."""
     return render_template('home.html')
+
+@app.route('/secure-page/')
+@login_required
+def secure_page():
+    if current_user.is_authenticated:
+        return render_template('secure-page.html')
+    else:
+        return redirect(url_for('login'))
 
 
 @app.route('/about/')
@@ -44,10 +53,18 @@ def login():
             
                 login_user(user)
                 flash("Logged in sucessfully.", 'sucess')
-                return redirect(url_for("secure-page"))
+                return redirect(url_for("secure_page"))
             else:
                 flash("Incorrect username or password", "failure")  # they should be redirected to a secure-page route instead
     return render_template("login.html", form=form)
+
+
+@app.route('/logout/')
+@login_required
+def logout():
+    logout_user()
+    flash("User Logged Out")
+    return redirect(url_for('home'))
 
 
 # user_loader callback. This callback is used to reload the user object from
